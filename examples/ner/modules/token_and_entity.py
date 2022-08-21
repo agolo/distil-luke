@@ -12,6 +12,7 @@ class TokenEntityNERFeatureExtractor(NERFeatureExtractor):
         self, embedder: TokenEmbedder,
     ):
         super().__init__()
+        ## * Embedder should be luke
         self.embedder = embedder
 
     def get_output_dim(self):

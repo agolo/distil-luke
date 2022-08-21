@@ -88,6 +88,11 @@ class LukeEncoder(nn.Module):
     def __init__(self, config: LukeConfig):
         super().__init__()
         self.output_hidden_states = config.output_hidden_states
+
+        ## TODO: here in luke config:
+        ## *Override: config.num_hidden_layers = 1
+        ## * Override: number of hidden layers = number of intermediate size = 300
+        ## * h = number of attention heads = 4
         self.layer = nn.ModuleList([BertLayer(config) for _ in range(config.num_hidden_layers)])
 
     def forward(self, hidden_states, attention_mask=None):
@@ -112,6 +117,7 @@ class LukeModel(nn.Module):
     def __init__(self, config: LukeConfig):
         super().__init__()
 
+        print(f"##LUKE CONFIGS {config.to_dict()}")
         self.config = config
 
         self.encoder = LukeEncoder(config)
@@ -217,7 +223,7 @@ class LukeModel(nn.Module):
         attention_mask = word_attention_mask
         if entity_attention_mask is not None:
             attention_mask = torch.cat([attention_mask, entity_attention_mask], dim=1)
-        extended_attention_mask = attention_mask.unsqueeze(1).unsqueeze(2)
+        extended_attention_mask = attention_mask.unsqueeze(1).unsqueeze(2) 
         extended_attention_mask = extended_attention_mask.to(dtype=next(self.parameters()).dtype)
         extended_attention_mask = (1.0 - extended_attention_mask) * -10000.0
 

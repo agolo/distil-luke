@@ -18,15 +18,15 @@ local token_indexers = {
     "train_data_path": std.extVar("TRAIN_DATA_PATH"),
     "validation_data_path": std.extVar("VALIDATION_DATA_PATH"),
     "trainer": {
-        "cuda_device": -1,
+        "cuda_device": 0,
         "grad_norm": 5,
-        "num_epochs": 5,
+        "num_epochs": 2000,
         "checkpointer": {
-            "keep_most_recent_by_count": 1
+            "keep_most_recent_by_count": 2
         },
         "optimizer": {
             "type": "adamw",
-            "lr": 1e-5,
+            "lr": 4e-5,
             "weight_decay": 0.01,
             "parameter_groups": [
                 [

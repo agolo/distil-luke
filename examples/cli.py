@@ -24,6 +24,7 @@ try:
     logging.getLogger().removeHandler(absl.logging._absl_handler)
     absl.logging._warn_preinit_stderr = False
 except ImportError:
+    print("FUCK")
     pass
 
 logger = logging.getLogger(__name__)
@@ -41,6 +42,8 @@ logger = logging.getLogger(__name__)
 @commet_logger_args
 @click.pass_context
 def cli(ctx, **kwargs):
+
+    logger.info("ENTRY POINT HERE")
     args = Namespace(**kwargs)
 
     if args.local_rank == -1 and args.num_gpus > 1:

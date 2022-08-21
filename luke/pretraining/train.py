@@ -60,6 +60,8 @@ def create_model_and_config(
     args: Namespace, entity_vocab_size: int, local_rank: int
 ) -> Tuple[LukePretrainingModel, LukeConfig]:
     bert_config = AutoConfig.from_pretrained(args.bert_model_name)
+    
+    print("\n\n###### BERT Configurations: ", bert_config, "\n\n")
 
     config = LukeConfig(
         entity_vocab_size=entity_vocab_size,
@@ -177,6 +179,8 @@ def pretrain(**kwargs):
     from deepspeed.utils.logging import LoggerFactory
 
     logger = LoggerFactory.create_logger(__name__)
+    
+    logger.info("FUCKIN HERE")
 
     args = Namespace(**kwargs)
     deepspeed.init_distributed(dist_backend="nccl")

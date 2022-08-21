@@ -208,7 +208,10 @@ class ConllSpanReader(DatasetReader):
                         }
                     )
 
+                #print(f"\n\n#### DATA: { fields['input_words'].metadata} \n\n")
                 yield Instance(fields)
+
+                
 
         for (s, e), entity in span_to_entity_label.items():
             mention_length = e - s + 1
@@ -224,4 +227,7 @@ class ConllSpanReader(DatasetReader):
         for i, (words, labels, sentence_boundaries) in enumerate(
             parse_conll_ner_data(file_path, encoding=self.encoding)
         ):
+            #print(f"\n\n#### WORDS: {words}\n\n")
+            #print(f"\n\n#### LABELS: {labels}\n\n")
+
             yield from self.data_to_instance(words, labels, sentence_boundaries, f"doc{i}")

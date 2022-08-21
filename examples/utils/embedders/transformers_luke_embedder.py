@@ -2,8 +2,8 @@ from typing import Optional
 
 import torch
 from allennlp.modules.token_embedders.token_embedder import TokenEmbedder
-from transformers.models.luke.modeling_luke import LukeModel
-
+#from transformers.models.luke.modeling_luke import LukeModel
+from .luke.pretraining.train import create_ner_model_and_config
 
 @TokenEmbedder.register("transformers-luke")
 class TransformersLukeEmbedder(TokenEmbedder):
@@ -31,7 +31,9 @@ class TransformersLukeEmbedder(TokenEmbedder):
             raise ValueError(f"Invalid argument: {output_embeddings}")
         self.output_embeddings = output_embeddings
 
-        self.luke_model = LukeModel.from_pretrained(model_name, use_entity_aware_attention=use_entity_aware_attention)
+        ##* LUKE MODEL HERE
+        ##! TODO : WTF is the vocab size?
+        self.luke_model, _ = create_ner_model_and_config(50265) # LukeModel.from_pretrained(model_name, use_entity_aware_attention=use_entity_aware_attention)
         if not train_parameters:
             for param in self.transformer_model.parameters():
                 param.requires_grad = False
@@ -55,7 +57,7 @@ class TransformersLukeEmbedder(TokenEmbedder):
                 "Entity embeddings are expected but the model cannot compute entity emebddings without entity_ids."
             )
 
-        luke_outputs = self.luke_model(
+        '''luke_outputs = self.luke_model(
             input_ids=token_ids,
             token_type_ids=type_ids,
             attention_mask=mask,
@@ -63,13 +65,24 @@ class TransformersLukeEmbedder(TokenEmbedder):
             entity_position_ids=entity_position_ids,
             entity_token_type_ids=entity_segment_ids,
             entity_attention_mask=entity_attention_mask,
+            
+        )'''
+        luke_outputs = self.luke_model(
+            word_ids=token_ids,
+            word_segment_ids=type_ids,
+            word_attention_mask=mask,
+            entity_ids=entity_ids,
+            entity_position_ids=entity_position_ids,
+            entity_segment_ids=entity_segment_ids,
+            entity_attention_mask=entity_attention_mask
         )
+
 
         if self.output_embeddings == "token":
             return luke_outputs.last_hidden_state
         elif self.output_embeddings == "entity":
             return luke_outputs.entity_last_hidden_state
         elif self.output_embeddings == "token+entity":
-            return luke_outputs.last_hidden_state, luke_outputs.entity_last_hidden_state
+            return luke_outputs[0], luke_outputs[1]
         else:
             raise RuntimeError(f"Something is wrong with self.output_embeddings: {self.output_embeddings}.")

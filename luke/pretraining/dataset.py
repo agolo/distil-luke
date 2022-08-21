@@ -57,13 +57,16 @@ _abstract_only = _language = None
 def build_wikipedia_pretraining_dataset(
     dump_db_file: str, tokenizer_name: str, entity_vocab_file: str, output_dir: str, sentence_splitter: str, **kwargs
 ):
+
+    #print("TOKENIZAAR: ", tokenizer_name)
+    
     dump_db = DumpDB(dump_db_file)
     tokenizer = AutoTokenizer.from_pretrained(tokenizer_name, use_fast=False)
     sentence_splitter = SentenceSplitter.from_name(sentence_splitter)
 
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
-
+    
     entity_vocab = EntityVocab(entity_vocab_file)
     WikipediaPretrainingDataset.build(dump_db, tokenizer, sentence_splitter, entity_vocab, output_dir, **kwargs)
 
