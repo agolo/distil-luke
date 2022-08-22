@@ -45,10 +45,9 @@ local token_indexers = {
             "warmup_ratio": 0.06
         },
         "num_gradient_accumulation_steps": 4,
-        "patience": 3,
         "validation_metric": "+f1"
     },
-    "data_loader": {"batch_size": 2, "shuffle": true},
+    "data_loader": {"batch_size": 8, "shuffle": true},
     "random_seed": 0,
     "numpy_seed": 0,
     "pytorch_seed": 0

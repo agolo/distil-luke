@@ -30,6 +30,10 @@ class ExhaustiveNERModel(Model):
         if torch.cuda.is_available():
             print("## TEACHER TO CUDA")
             self.teacher_model.cuda(device=1)
+        
+        for param in self.teacher_model.parameters():
+            param.requires_grad = False
+        self.teacher_model.eval()
 
         self.text_field_key = text_field_key
 
@@ -93,16 +97,34 @@ class ExhaustiveNERModel(Model):
         prediction_logits, prediction = logits.max(dim=-1)
         output_dict = {"logits": logits, "prediction": prediction, "input": input_words}
 
-        if labels is not None:
+        #if labels is not None:
 
             #print(f"## LABELS in Train: {labels.shape}")
             #print(f"## LOGITS in Train: {logits.shape}")
 
             ## TODO [SALEM] REPLACE LABELS WITH LOGITS HERE
+        
 
-            output_dict["loss"] = self.criterion(logits.flatten(0, 1), labels.flatten())
-            self.span_accuracy(logits, labels, mask=(labels != -1))
-            self.span_f1(prediction, labels, prediction_logits, original_entity_spans, doc_id, input_words)
+        
+
+        flattened_teacher_logits = teacher_outputs.logits.flatten(0,1)
+        #print(f"### TEACHER LOGITS {flattened_teacher_logits.shape}")
+        #print(f"#### FLATTENED LABELS BEFORE{labels.flatten().shape}")
+
+        flattened_labels = labels.flatten().unsqueeze(1).repeat(1, flattened_teacher_logits.shape[1])
+        #print(f"#### FLATTENED LABELS {flattened_labels.shape}")
+        teacher_label_balanced = (0.5* flattened_teacher_logits) + (0.5*flattened_labels)
+        flattened_student_logits = logits.flatten(0, 1)
+        logprob = nn.functional.log_softmax(flattened_student_logits)
+
+        loss = nn.functional.kl_div(logprob, teacher_label_balanced, reduction='batchmean')
+        #print(f"### LABELS LOGITS {labels.flatten().shape}")
+        #!print(f"### TEACHER LOGITS {flattened_teacher_logits.shape}")
+        #!print(f"### STUDENT LOGITS {flattened_student_logits.shape}")
+
+        output_dict["loss"] =   loss#self.criterion(flattened_student_logits, flattened_teacher_logits)
+        self.span_accuracy(logits, labels, mask=(labels != -1))
+        self.span_f1(prediction, labels, prediction_logits, original_entity_spans, doc_id, input_words)
 
         return output_dict
 
